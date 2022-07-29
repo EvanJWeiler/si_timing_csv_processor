@@ -1,0 +1,35 @@
+{
+    "specify_input_file": true,
+    "input_file_name": "input_file.csv",
+    "title_style": {
+        "font_color": "#FFFFFF",
+        "fill_color": "#000000",
+        "font_size": 18,
+        "font_name": "Arial",
+        "is_bold": true,
+        "border_thickness": "thin"
+    },
+    "header_style": {
+        "font_color": "#FFFFFF",
+        "fill_color": "#000000",
+        "font_size": 10,
+        "font_name": "Arial",
+        "is_bold": true,
+        "border_thickness": "thin"
+    },
+    "body_style": {
+        "font_size": 10,
+        "font_name": "Arial",
+        "border_thickness": "thin"
+    },
+    "categories": [
+        "Category 1",
+        "Category 2",
+        "Category 3"
+    ],
+    "points_table": {
+        "1": 200,
+        "DNF": 1,
+        "N/C": 0
+    }
+}
