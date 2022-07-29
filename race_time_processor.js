@@ -65,6 +65,8 @@ function getPlace(result) {
 
 // main processing function
 function processTimes(race_results) {
+    console.log('Race results fetched, beginning processing...');
+
     const stage_names = getStageNames(race_results);
     const num_stages = stage_names.length / 2;
     const cat_results = {};
@@ -123,6 +125,8 @@ function processTimes(race_results) {
 }
 
 function generateExcel(cat_results, stage_names) {
+    console.log('Result processing finished, generating output Excel file...');
+
     const num_stages = stage_names.length / 2;
     const wb = new excel.Workbook();
 
@@ -350,10 +354,12 @@ function setup() {
 
 function main() {
     const race_times = [];
-    const r1 = readline.createInterface({
+    const readline_interface = readline.createInterface({
         input: process.stdin,
         output: process.stdout
     });
+
+    console.log('Starting processor, fetching input file \"' + input_file_name + '\"');
 
     if (!fs.existsSync(input_file_name)) {
         console.error('ERROR - file with name \"' + input_file_name + '\" does not exist');

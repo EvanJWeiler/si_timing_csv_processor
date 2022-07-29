@@ -2,6 +2,7 @@
 *.xlsx
 *.csv
 *.pdf
+*.exe
 config.json
 
 # Logs
