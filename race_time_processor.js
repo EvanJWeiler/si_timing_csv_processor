@@ -4,7 +4,7 @@ const csv = require('fast-csv');
 const readline = require('readline');
 
 let config;
-let input_file_name;
+let input_file_names;
 
 function getCategoryName(racer_result) {
     let index = racer_result[7].search(/[a-zA-Z]/);
@@ -51,20 +51,8 @@ function getPlace(result) {
     }
 }
 
-// needed columns: Plate#, Place, Name, Team/Sponsor, Overall, Behind, Stages 1-X times and place (times to hundreth of a second)
-// note: columns must fit across one page
-// csv col numbers:
-// Plate# - 0
-// Place - 12
-// Status (if place blank) - 13
-// Name - 3
-// Team/Sponsor - 5
-// Overall - 10
-// Behind - 25
-// Stages 1-X times and place - starts at 31, 2 columns per stage (i.e. column 31-42 for 6 stages)
-
 // main processing function
-function processTimes(race_results) {
+function processTimes(race_results, file_name) {
     console.log('Race results fetched, beginning processing...');
 
     const stage_names = getStageNames(race_results);
@@ -121,11 +109,11 @@ function processTimes(race_results) {
         }
     });
 
-    generateExcel(cat_results, stage_names);
+    generateExcel(cat_results, stage_names, file_name);
 }
 
-function generateExcel(cat_results, stage_names) {
-    console.log('Result processing finished, generating output Excel file...');
+function generateExcel(cat_results, stage_names, file_name) {
+    console.log('Result processing for ' + file_name + ' finished, generating output excel');
 
     const num_stages = stage_names.length / 2;
     const wb = new excel.Workbook();
@@ -233,10 +221,10 @@ function generateExcel(cat_results, stage_names) {
     }
 
     //generate tables
-    //pro women
     let currRow = 2;
     
-    const category_names = config.categories;
+    const category_names = [...config.categories];
+
     sanitizeCatNames(category_names, cat_results);
 
     for (let category_name of category_names) {
@@ -337,38 +325,43 @@ function generateExcel(cat_results, stage_names) {
         currRow++;
     }
 
-    wb.write(input_file_name.substring(0, input_file_name.indexOf('.csv')) + '.xlsx');
+    wb.write(file_name.substring(0, file_name.indexOf('.csv')) + '.xlsx');
 
-    console.log('Done!');
+    console.log(file_name + ' done!');
 }
 
 function setup() {
     config = JSON.parse(fs.readFileSync('./config.json', 'utf-8'));
 
     if (config.specify_input_file) {
-        input_file_name = config.input_file_name;
+        input_file_names = config.input_file_names;
     } else {
-        input_file_name = fs.readdirSync('./').filter(file => file.includes('.csv')).at(0);
+        input_file_names = fs.readdirSync('./').filter(file => file.includes('.csv'));
     }
 }
 
 function main() {
-    const race_times = [];
     const readline_interface = readline.createInterface({
         input: process.stdin,
         output: process.stdout
     });
 
-    console.log('Starting processor, fetching input file \"' + input_file_name + '\"');
+    const race_times = {};
 
-    if (!fs.existsSync(input_file_name)) {
-        console.error('ERROR - file with name \"' + input_file_name + '\" does not exist');
-    } else {
-        fs.createReadStream(input_file_name).pipe(csv.parse({ headers: false }))
-            .on('error', error => console.error(error))
-            .on('data', row => race_times.push(row))
-            .on('end', () => processTimes(race_times));
-    }    
+    console.log('Starting processor, fetching input files...');
+    console.log('Found file(s): ' + input_file_names);
+
+    for (let file_name of input_file_names) {
+        if (!fs.existsSync(file_name)) {
+            console.error('ERROR - file with name \"' + file_name + '\" does not exist, moving to next file');
+        } else {
+            race_times[file_name] = [];
+            fs.createReadStream(file_name).pipe(csv.parse({ headers: false }))
+                .on('error', error => console.error(error))
+                .on('data', row => race_times[file_name].push(row))
+                .on('end', () => processTimes(race_times[file_name], file_name));
+        }
+    }
 }                                                                                                                  
 
 setup();
