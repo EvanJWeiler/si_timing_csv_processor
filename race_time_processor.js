@@ -6,12 +6,14 @@ const readline = require('readline');
 let config;
 let input_file_names;
 
+// finds category name for given racer result, filters out any prefaces before actual category name
 function getCategoryName(racer_result) {
     let index = racer_result[7].search(/[a-zA-Z]/);
 
     return racer_result[7].substring(index);
 }
 
+// removes all categories from results that have no racers
 function sanitizeCatNames(category_names, cat_results) {
     let to_be_removed = [];
 
@@ -26,6 +28,7 @@ function sanitizeCatNames(category_names, cat_results) {
     }
 }
 
+// uses first line of csv to get stage name and discards it
 function getStageNames(race_times) {
     let csv_header = race_times[0];
     let stage_names = csv_header.slice(31, csv_header.indexOf('NumSplits'));
@@ -41,6 +44,7 @@ function getStageNames(race_times) {
     return stage_names;
 }
 
+// covers cases for both DNF and N/C
 function getPlace(result) {
     if (result[12] != '') {
         return result[12];
@@ -112,12 +116,14 @@ function processTimes(race_results, file_name) {
     generateExcel(cat_results, stage_names, file_name);
 }
 
+// generates excel from processed results
 function generateExcel(cat_results, stage_names, file_name) {
     console.log('Result processing for ' + file_name + ' finished, generating output excel');
 
     const num_stages = stage_names.length / 2;
     const wb = new excel.Workbook();
 
+    // configuring style of each section
     const title_style = wb.createStyle({
         font: {
             color: config.title_style.font_color,
@@ -210,7 +216,7 @@ function generateExcel(cat_results, stage_names, file_name) {
 
     let ws = wb.addWorksheet('Results');
 
-    //generate header
+    // generate header
     ws.cell(1, 1)
         .string('**event title**')
         .style(title_style);
@@ -220,7 +226,7 @@ function generateExcel(cat_results, stage_names, file_name) {
             .style(title_style);
     }
 
-    //generate tables
+    // generate tables
     let currRow = 2;
     
     const category_names = [...config.categories];
@@ -228,7 +234,7 @@ function generateExcel(cat_results, stage_names, file_name) {
     sanitizeCatNames(category_names, cat_results);
 
     for (let category_name of category_names) {
-        //category name row
+        // category name row
         ws.cell(currRow, 1)
             .string(category_name.toUpperCase())
             .style(title_style);
@@ -240,7 +246,7 @@ function generateExcel(cat_results, stage_names, file_name) {
 
         currRow++;
 
-        //header row
+        // header row
         ws.cell(currRow, 1)
             .string('Place')
             .style(header_style);
@@ -280,7 +286,8 @@ function generateExcel(cat_results, stage_names, file_name) {
         }
 
         currRow++;
-
+        
+        // one row for each racer result per category
         for (let result of cat_results[category_name]) {
             ws.cell(currRow, 1)
                 .string(result.place)
@@ -330,6 +337,7 @@ function generateExcel(cat_results, stage_names, file_name) {
     console.log(file_name + ' done!');
 }
 
+// initial setting of input_file_names
 function setup() {
     config = JSON.parse(fs.readFileSync('./config.json', 'utf-8'));
 
@@ -340,6 +348,7 @@ function setup() {
     }
 }
 
+// handles csv import and kicks off processing for each
 function main() {
     const readline_interface = readline.createInterface({
         input: process.stdin,
