@@ -8,9 +8,14 @@ let input_file_names;
 
 // finds category name for given racer result, filters out any prefaces before actual category name
 function getCategoryName(racer_result) {
-    let index = racer_result[7].search(/[a-zA-Z]/);
-
-    return racer_result[7].substring(index);
+    let index_letter = racer_result[7].search(/[a-zA-Z]/);
+    let index_open = racer_result[7].indexOf('(');
+    
+    if (index_letter < index_open) {
+        return racer_result[7].substring(index_letter, index_open - 1);
+    } else {
+        return racer_result[7].substring(index_letter);
+    }
 }
 
 // removes all categories from results that have no racers
