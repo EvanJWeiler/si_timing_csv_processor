@@ -1,6 +1,8 @@
 {
     "specify_input_file": true,
-    "input_file_name": "input_file.csv",
+    "input_file_names": [
+        "example.csv"
+    ],
     "title_style": {
         "font_color": "#FFFFFF",
         "fill_color": "#000000",
