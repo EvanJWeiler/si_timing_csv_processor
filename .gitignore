@@ -4,6 +4,7 @@
 *.pdf
 *.exe
 config.json
+/output_exe
 
 # Logs
 logs
