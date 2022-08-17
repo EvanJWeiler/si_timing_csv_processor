@@ -334,7 +334,15 @@ function generateExcel(cat_results, stage_names, file_name) {
             currRow++;
         }
 
+        delete cat_results[category_name];
         currRow++;
+    }
+
+    const missed_cats = Object.keys(cat_results);
+
+    if (missed_cats.length > 0) {
+        const err = new Error('Categories \"' + missed_cats + '\" went unprocessed, double-check that their category name in the configuration is correct.');
+        throw err;
     }
 
     wb.write(file_name.substring(0, file_name.indexOf('.csv')) + '.xlsx');
